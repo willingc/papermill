@@ -63,9 +63,14 @@ class Key(object):
         self.etag = etag
         if last_modified:
             try:
+<<<<<<< HEAD
                 self.last_modified = last_modified.isoformat().split(
                     '+')[0] + '.000Z'
             except:
+=======
+                self.last_modified = last_modified.isoformat().split('+')[0] + '.000Z'
+            except ValueError:
+>>>>>>> 967f9e4... update docstrings and style for s3
                 self.last_modified = last_modified
         self.storage_class = storage_class
         self.is_prefix = False
