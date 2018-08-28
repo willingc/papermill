@@ -29,7 +29,10 @@ required = [req.strip() for req in read(req_path).splitlines() if req.strip()]
 
 test_req_path = os.path.join(os.path.dirname('__file__'), 'requirements-dev.txt')
 test_required = [req.strip() for req in read(test_req_path).splitlines() if req.strip()]
+print(test_required)
 extras_require = {"test": test_required, "dev": test_required}
+print("extras_require")
+print(extras_require)
 
 pip_too_old = False
 pip_message = ''
@@ -68,7 +71,7 @@ setup(
     url='https://github.com/nteract/papermill',
     packages=['papermill'],
     install_requires=required,
-    extras_require=dict(extras_require),
+    extras_require=extras_require,
     entry_points={'console_scripts': ['papermill = papermill.cli:papermill']},
     project_urls= {
         'Documentation': 'https://papermill.readthedocs.io',
