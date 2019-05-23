@@ -7,7 +7,9 @@ This part of the documentation lists the full API reference of all public classe
    :maxdepth: 2
 
    papermill-cli
-   papermill-workflow
+   papermill-workflow-execution
+   papermill-workflow-engines
+   papermill-workflow-preprocess
    papermill-translators
    papermill-io
    papermill-storage
