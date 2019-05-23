@@ -3,10 +3,13 @@ Welcome to papermill
 
 .. image:: https://travis-ci.org/nteract/papermill.svg?branch=master
    :target: https://travis-ci.org/nteract/papermill
+
 .. image:: https://codecov.io/github/nteract/papermill/coverage.svg?branch=master
    :target: https://codecov.io/github/nteract/papermill?branch=master
+
 .. image:: https://readthedocs.org/projects/papermill/badge/?version=latest
    :target: http://papermill.readthedocs.io/en/latest/?badge=latest
+
 .. image:: https://tinyurl.com/ybwovtw2
    :target: https://mybinder.org/v2/gh/nteract/papermill/master?filepath=binder%2Fprocess_highlight_dates.ipynb
 .. image:: https://tinyurl.com/y7uz2eh9
