@@ -1,11 +1,10 @@
 """Engines to perform different roles"""
-import sys
 import copy
 import datetime
 import dateutil
-
-from functools import wraps
 import entrypoints
+import sys
+from functools import wraps
 
 from .log import logger
 from .exceptions import PapermillException
@@ -24,10 +23,25 @@ except OSError:
 
 class PapermillEngines(object):
     """
-    The holder which houses any engine registered with the system.
+    A registry of engines installed which papermill may use.
 
-    This object is used in a singleton manner to save and load particular
-    named Engine objects so they may be referenced externally.
+    Each engine specifies how a notebook is executed by papermill. Custom
+    engines inherit from the `Engine` class.
+
+    This `PapermillEngines` object is used in a singleton manner to save and
+    load particular named `Engine` objects so they may be referenced externally.
+
+    Methods
+    -------
+
+    register(self, name, engine)
+        Registers a custom named engine with the PapermillEngines registry
+    register_entry_points(self)
+        Register entrypoints for all custom engines and load their handlers
+    get_engine(self, name=None)
+        Retrieves an engine object by name from the registry
+    execute_notebook_with_engine(self, engine_name, nb, kernel_name, **kwargs)
+        Fetch a named engine and use it to execute the notebook
     """
 
     def __init__(self):
@@ -279,26 +293,53 @@ class NotebookExecutionManager(object):
 
 class Engine(object):
     """
-    Base class for engines.
+    Base class for named engines.
 
-    Other specific engine classes should inherit and implement the
+    A custom named engine class should inherit from this and implement the
     `execute_managed_notebook` method.
 
-    Defines `execute_notebook` method which is used to correctly setup
-    the `NotebookExecutionManager` object for engines to interact against.
+    The `execute_notebook` class method sets up the `NotebookExecutionManager`
+    object which holds the state of a notebook during execution. Custom named
+    engines do not need to implement this method.
     """
 
     @classmethod
     def execute_notebook(
-        cls, nb, kernel_name, output_path=None, progress_bar=True, log_output=False, **kwargs
+        cls,
+        nb,
+        kernel_name,
+        output_path=None,
+        progress_bar=True,
+        log_output=False,
+        **kwargs
     ):
         """
         A wrapper to handle notebook execution tasks.
 
-        Wraps the notebook object in a `NotebookExecutionManager` in order to track
+        Wraps the notebook object in a `NotebookExecutionManager` which tracks
         execution state in a uniform manner. This is meant to help simplify
         engine implementations. This allows a developer to just focus on
         iterating and executing the cell contents.
+
+        Parameters
+        ----------
+        nb
+            notebook object to be executed
+        kernel_name
+            name of language kernel to be used
+        output_path
+            path where executed notebook is sent (default: None)
+        progress_bar : bool, optional
+            display a progress bar during execution (default: True)
+        log_output : bool, optional
+            log output to stderr during execution (default: False)
+        **kwargs
+            Arbitrary keyword (named) arguments
+        Returns
+        -------
+        nb_man.nb
+            The notebook state provided by the `NotebookExecutionManager`
+
         """
         nb_man = NotebookExecutionManager(
             nb, output_path=output_path, progress_bar=progress_bar, log_output=log_output
@@ -306,7 +347,9 @@ class Engine(object):
 
         nb_man.notebook_start()
         try:
-            nb = cls.execute_managed_notebook(nb_man, kernel_name, log_output=log_output, **kwargs)
+            nb = cls.execute_managed_notebook(
+                nb_man, kernel_name, log_output=log_output, **kwargs
+            )
             # Update the notebook object in case the executor didn't do it for us
             if nb:
                 nb_man.nb = nb
@@ -319,7 +362,9 @@ class Engine(object):
     @classmethod
     def execute_managed_notebook(cls, nb_man, kernel_name, **kwargs):
         """An abstract method where implementation will be defined in a subclass."""
-        raise NotImplementedError("'execute_managed_notebook' is not implemented for this engine")
+        raise NotImplementedError(
+            "'execute_managed_notebook' is not implemented for this engine"
+        )
 
 
 class NBConvertEngine(Engine):
@@ -358,7 +403,9 @@ class NBConvertEngine(Engine):
         # Rearrange arguments. Handle potential duplicates from **kwargs.
         # Prioritize values passed to the function or set in the module.
         preprocessor_handled_args = ['timeout', 'startup_timeout', 'kernel_name', 'log']
-        safe_kwargs = {key: kwargs[key] for key in kwargs if key not in preprocessor_handled_args}
+        safe_kwargs = {
+            key: kwargs[key] for key in kwargs if key not in preprocessor_handled_args
+        }
         timeout = execution_timeout if execution_timeout else kwargs.get('timeout')
         preprocessor = PapermillExecutePreprocessor(
             timeout=timeout,
