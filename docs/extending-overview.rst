@@ -22,6 +22,7 @@ developing papermill itself.
    :maxdepth: 2
 
    extending-entry-points
+   extending-engines
    extending-developing
 
 
